@@ -1,3 +1,4 @@
+# coding=utf-8
 # vim: expandtab:ts=4:sw=4
 import numpy as np
 import colorsys
@@ -84,24 +85,31 @@ class NoVisualization(object):
 class Visualization(object):
     """
     This class shows tracking output in an OpenCV image viewer.
+    使用OpenCV image viewer可视化跟踪输出
     """
 
     def __init__(self, seq_info, update_ms):
-        image_shape = seq_info["image_size"][::-1]
-        aspect_ratio = float(image_shape[1]) / image_shape[0]
+        image_shape = seq_info["image_size"][::-1] # 获取跟踪图像大小
+        aspect_ratio = float(image_shape[1]) / image_shape[0] # 图像aspect_ratio，W/H
         image_shape = 1024, int(aspect_ratio * 1024)
+        # 图像可视化控件，可视化跟新间隔update_ms
         self.viewer = ImageViewer(
             update_ms, image_shape, "Figure %s" % seq_info["sequence_name"])
+        # 可视化thickness
         self.viewer.thickness = 2
+        # 可视化当前最小帧idx和最大帧idx
         self.frame_idx = seq_info["min_frame_idx"]
         self.last_idx = seq_info["max_frame_idx"]
 
+    # 可视化run，每一帧callback
     def run(self, frame_callback):
         self.viewer.run(lambda: self._update_fun(frame_callback))
 
+    # 更新函数
     def _update_fun(self, frame_callback):
         if self.frame_idx > self.last_idx:
             return False  # Terminate
+        # 每一帧回调
         frame_callback(self, self.frame_idx)
         self.frame_idx += 1
         return True

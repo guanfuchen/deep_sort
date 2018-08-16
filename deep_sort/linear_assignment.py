@@ -1,3 +1,4 @@
+# coding=utf-8
 # vim: expandtab:ts=4:sw=4
 from __future__ import absolute_import
 import numpy as np
@@ -79,6 +80,8 @@ def matching_cascade(
         distance_metric, max_distance, cascade_depth, tracks, detections,
         track_indices=None, detection_indices=None):
     """Run matching cascade.
+    运行匹配级联，匹配级联利用distance_metric度量跟踪和检测的相似度，max_distances关联代价最大距离，cascade_depth级联深度，tracks当前帧的预测跟踪，detections
+    当前帧的检测
 
     Parameters
     ----------
@@ -146,6 +149,7 @@ def gate_cost_matrix(
         gated_cost=INFTY_COST, only_position=False):
     """Invalidate infeasible entries in cost matrix based on the state
     distributions obtained by Kalman filtering.
+    基于卡尔曼滤波获得的状态分布，使成本矩阵中的不可行条目无效。
 
     Parameters
     ----------
@@ -168,9 +172,11 @@ def gate_cost_matrix(
     gated_cost : Optional[float]
         Entries in the cost matrix corresponding to infeasible associations are
         set this value. Defaults to a very large value.
+        对于无法通过卡尔曼滤波进行关联的gated_cost，对应于非常大的值
     only_position : Optional[bool]
         If True, only the x, y position of the state distribution is considered
         during gating. Defaults to False.
+        仅仅位置标志，如果该标志True，那么状态分布中仅仅只有x和y位置被考虑门控，否则都考虑，包括x，y，a，h
 
     Returns
     -------
@@ -178,13 +184,16 @@ def gate_cost_matrix(
         Returns the modified cost matrix.
 
     """
-    gating_dim = 2 if only_position else 4
-    gating_threshold = kalman_filter.chi2inv95[gating_dim]
+    gating_dim = 2 if only_position else 4 # gating_dim默认卡尔曼滤波器中的4维特征都考虑进去
+    gating_threshold = kalman_filter.chi2inv95[gating_dim] # 查找卡方分布的对应维度的0.95阈值
+    # 将检测结果中的tlwh转换为卡尔曼滤波器计算的状态空间xyah
     measurements = np.asarray(
         [detections[i].to_xyah() for i in detection_indices])
     for row, track_idx in enumerate(track_indices):
+        # 获取对应跟踪的track_idx的跟踪，然后计算track的距离
         track = tracks[track_idx]
         gating_distance = kf.gating_distance(
             track.mean, track.covariance, measurements, only_position)
+        # 设置gating_distance的距离大于gating_threshold设置不关联了
         cost_matrix[row, gating_distance > gating_threshold] = gated_cost
     return cost_matrix

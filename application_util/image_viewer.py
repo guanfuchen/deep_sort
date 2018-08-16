@@ -1,3 +1,4 @@
+# coding=utf-8
 # vim: expandtab:ts=4:sw=4
 """
 This module contains an image viewer and drawing routines based on OpenCV.
@@ -60,6 +61,7 @@ def view_roi(mat, roi):
 
 class ImageViewer(object):
     """An image viewer with drawing routines and video capture capabilities.
+    绘制routines和视频capture能力的图像viewer
 
     Key Bindings:
 
@@ -99,14 +101,14 @@ class ImageViewer(object):
     """
 
     def __init__(self, update_ms, window_shape=(640, 480), caption="Figure 1"):
-        self._window_shape = window_shape
-        self._caption = caption
-        self._update_ms = update_ms
-        self._video_writer = None
+        self._window_shape = window_shape # 更新窗口shape
+        self._caption = caption # caption
+        self._update_ms = update_ms # 更新ms
+        self._video_writer = None # 视频writer
         self._user_fun = lambda: None
-        self._terminate = False
+        self._terminate = False # 是否终止程序
 
-        self.image = np.zeros(self._window_shape + (3, ), dtype=np.uint8)
+        self.image = np.zeros(self._window_shape + (3, ), dtype=np.uint8) # 图像可视化窗口
         self._color = (0, 0, 0)
         self.text_color = (255, 255, 255)
         self.thickness = 1
@@ -282,10 +284,13 @@ class ImageViewer(object):
         """
         self._video_writer = None
 
+    # ImageViewer update
     def run(self, update_fun=None):
         """Start the image viewer.
+        开始image viewer
 
         This method blocks until the user requests to close the window.
+        知道用户请求关闭窗口该方法结束
 
         Parameters
         ----------
@@ -295,14 +300,18 @@ class ImageViewer(object):
 
         """
         if update_fun is not None:
+            # 用户更新函数
             self._user_fun = update_fun
 
         self._terminate, is_paused = False, False
         # print("ImageViewer is paused, press space to start.")
+
+        # 直到用户请求终止
         while not self._terminate:
             t0 = time.time()
             if not is_paused:
                 self._terminate = not self._user_fun()
+                # 是否将跟踪结果通过视频的格式保留在本地
                 if self._video_writer is not None:
                     self._video_writer.write(
                         cv2.resize(self.image, self._window_shape))

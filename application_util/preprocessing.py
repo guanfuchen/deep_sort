@@ -1,3 +1,4 @@
+# coding=utf-8
 # vim: expandtab:ts=4:sw=4
 import numpy as np
 import cv2
@@ -5,6 +6,7 @@ import cv2
 
 def non_max_suppression(boxes, max_bbox_overlap, scores=None):
     """Suppress overlapping detections.
+    非极大值抑制
 
     Original code from [1]_ has been adapted to include confidence score.
 

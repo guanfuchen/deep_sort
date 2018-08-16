@@ -1,9 +1,11 @@
+# coding=utf-8
 # vim: expandtab:ts=4:sw=4
 import numpy as np
 import scipy.linalg
 
 
 """
+N个自由度的卡方分布的0.95质量查表，其中本文用到的4维度就是9.4877，2维度使用5.9915
 Table for the 0.95 quantile of the chi-square distribution with N degrees of
 freedom (contains values for N=1, ..., 9). Taken from MATLAB/Octave's chi2inv
 function and used as Mahalanobis gating threshold.
@@ -23,7 +25,9 @@ chi2inv95 = {
 class KalmanFilter(object):
     """
     A simple Kalman filter for tracking bounding boxes in image space.
+    图像space间跟踪bboxes的简单卡尔曼滤波器
 
+    卡尔曼建模得是8维的状态空间，包括x，y，a，h，vx，vy，va，vh
     The 8-dimensional state space
 
         x, y, a, h, vx, vy, va, vh
@@ -31,6 +35,7 @@ class KalmanFilter(object):
     contains the bounding box center position (x, y), aspect ratio a, height h,
     and their respective velocities.
 
+    目标运动估计建模为恒速，bbox位置作为直接的观察
     Object motion follows a constant velocity model. The bounding box location
     (x, y, a, h) is taken as direct observation of the state space (linear
     observation model).
@@ -124,6 +129,7 @@ class KalmanFilter(object):
 
     def project(self, mean, covariance):
         """Project state distribution to measurement space.
+        投影状态分布到测量空间
 
         Parameters
         ----------
@@ -188,6 +194,7 @@ class KalmanFilter(object):
     def gating_distance(self, mean, covariance, measurements,
                         only_position=False):
         """Compute gating distance between state distribution and measurements.
+        在测量值和度量值之间计算gating distance
 
         A suitable distance threshold can be obtained from `chi2inv95`. If
         `only_position` is False, the chi-square distribution has 4 degrees of

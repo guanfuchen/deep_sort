@@ -1,3 +1,4 @@
+# coding=utf-8
 # vim: expandtab:ts=4:sw=4
 import numpy as np
 
@@ -30,6 +31,7 @@ def _pdist(a, b):
 
 def _cosine_distance(a, b, data_is_normalized=False):
     """Compute pair-wise cosine distance between points in `a` and `b`.
+    计算pair-wise cosine距离
 
     Parameters
     ----------
@@ -49,6 +51,7 @@ def _cosine_distance(a, b, data_is_normalized=False):
 
     """
     if not data_is_normalized:
+        # 数据如果没有正则化，首先进行正则化
         a = np.asarray(a) / np.linalg.norm(a, axis=1, keepdims=True)
         b = np.asarray(b) / np.linalg.norm(b, axis=1, keepdims=True)
     return 1. - np.dot(a, b.T)
@@ -77,6 +80,7 @@ def _nn_euclidean_distance(x, y):
 
 def _nn_cosine_distance(x, y):
     """ Helper function for nearest neighbor distance metric (cosine).
+    最近邻距离度量cosine函数
 
     Parameters
     ----------
@@ -100,6 +104,7 @@ class NearestNeighborDistanceMetric(object):
     """
     A nearest neighbor distance metric that, for each target, returns
     the closest distance to any sample that has been observed so far.
+    最近邻度量metric，对于每一个目标，返回最近的距离
 
     Parameters
     ----------
@@ -126,16 +131,18 @@ class NearestNeighborDistanceMetric(object):
         if metric == "euclidean":
             self._metric = _nn_euclidean_distance
         elif metric == "cosine":
+            # 距离匹配方法为cosine distance
             self._metric = _nn_cosine_distance
         else:
             raise ValueError(
                 "Invalid metric; must be either 'euclidean' or 'cosine'")
-        self.matching_threshold = matching_threshold
-        self.budget = budget
+        self.matching_threshold = matching_threshold # appearance匹配阈值
+        self.budget = budget # budget
         self.samples = {}
 
     def partial_fit(self, features, targets, active_targets):
         """Update the distance metric with new data.
+        使用新的跟踪结果来更新距离
 
         Parameters
         ----------
@@ -148,13 +155,17 @@ class NearestNeighborDistanceMetric(object):
 
         """
         for feature, target in zip(features, targets):
+            # 增加相应的target的特征
             self.samples.setdefault(target, []).append(feature)
+            # budget是之前target的特征数量，更新budget
             if self.budget is not None:
                 self.samples[target] = self.samples[target][-self.budget:]
+        # targets的samples
         self.samples = {k: self.samples[k] for k in active_targets}
 
     def distance(self, features, targets):
         """Compute distance between features and targets.
+        计算特征和目标之间的距离
 
         Parameters
         ----------
@@ -171,7 +182,9 @@ class NearestNeighborDistanceMetric(object):
             `targets[i]` and `features[j]`.
 
         """
+        # cost_matrix为[#targets, #features]，为不同的targets和features的代价矩阵
         cost_matrix = np.zeros((len(targets), len(features)))
         for i, target in enumerate(targets):
+            # 遍历每一个目标，然后对特征进行度量
             cost_matrix[i, :] = self._metric(self.samples[target], features)
         return cost_matrix

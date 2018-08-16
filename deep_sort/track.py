@@ -1,3 +1,4 @@
+# coding=utf-8
 # vim: expandtab:ts=4:sw=4
 
 
@@ -159,6 +160,7 @@ class Track:
 
     def is_confirmed(self):
         """Returns True if this track is confirmed."""
+        # 如果该跟踪是确认的那么返回确认跟踪True，否则为False
         return self.state == TrackState.Confirmed
 
     def is_deleted(self):
